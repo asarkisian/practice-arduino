@@ -1,9 +1,8 @@
 #include <LedControl.h>
 
-using namespace std;
-
 #define JOYSTICK1_X A0
 #define JOYSTICK1_Y A1
+#define JOYSTICK1_BTN 9
 
 LedControl lc = LedControl(12, 10, 11, 1);
 
@@ -24,6 +23,7 @@ void setup() {
   // assign joystick pins
   pinMode(JOYSTICK1_X, INPUT);
   pinMode(JOYSTICK1_Y, INPUT);
+  pinMode(JOYSTICK1_BTN, INPUT_PULLUP);
 
   // initial draw of dot
   lc.setLed(0, dot1[0], dot1[1], true);
@@ -51,15 +51,14 @@ void drawDot1(const short row, const short col) {
   }
 }
 
-void checkIfClear() {
-  if (dot1[0] == 0 && dot1[1] == 0) {
-    lc.clearDisplay(0);
-  }
-}
-
 void readJoystick1() {
   const int readJoystick1X = analogRead(JOYSTICK1_X);
   const int readJoystick1Y = analogRead(JOYSTICK1_Y);
+  const int readJoystick1Btn = digitalRead(JOYSTICK1_BTN);
+
+  if (readJoystick1Btn == 0) {
+    lc.clearDisplay(0);
+  }
 
   if (readJoystick1X > 530) {
     drawDot1(dot1[0], dot1[1]+1);
@@ -76,6 +75,5 @@ void readJoystick1() {
 
 void loop() {
   readJoystick1();
-  checkIfClear();
   delay(100);
 }
