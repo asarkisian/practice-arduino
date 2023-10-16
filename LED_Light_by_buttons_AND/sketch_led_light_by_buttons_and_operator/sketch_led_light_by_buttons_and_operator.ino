@@ -16,18 +16,17 @@ void setup() {
 void checkButtons() {
   if (digitalRead(BUTTON1) == 0 && digitalRead(BUTTON2) == 0) {
     digitalWrite(LED2, HIGH);
-    return;
   } else {
     digitalWrite(LED2, LOW);
   }
   
-  if (digitalRead(BUTTON1) == 0) {
+  if (digitalRead(BUTTON1) == 0 && digitalRead(BUTTON2) == 1) {
     digitalWrite(LED1, HIGH);
   } else {
     digitalWrite(LED1, LOW);
   }
 
-  if (digitalRead(BUTTON2) == 0) {
+  if (digitalRead(BUTTON2) == 0 && digitalRead(BUTTON1) == 1) {
     digitalWrite(LED3, HIGH);
   } else {
     digitalWrite(LED3, LOW);
