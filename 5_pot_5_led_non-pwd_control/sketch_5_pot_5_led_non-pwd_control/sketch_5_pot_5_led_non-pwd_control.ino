@@ -39,14 +39,10 @@ void loop() {
   const short potYellow = analogRead(POT_YELLOW);
   const short potGreen = analogRead(POT_GREEN);
 
-  const bool toggleButton =  false;
-
   if (potWhite >= (1023/2)) {
     digitalWrite(LED_WHITE, HIGH);
-    Serial.println("TURNING WHITE ON");
   } else {
     digitalWrite(LED_WHITE, LOW);
-    Serial.println("TURNING WHITE OFF");
   }
 
   if (potRed>= (1023/2)) {
