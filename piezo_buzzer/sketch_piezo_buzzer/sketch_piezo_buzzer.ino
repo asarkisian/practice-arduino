@@ -5,7 +5,7 @@
 // Note:"31 hertz is the lowest frequency
 // Note: must call noTone() if using multiple piezo buzzers on separate pins
 
-const short PIEZO_PIN = 8;
+const short PIEZO_PIN = 5;
 
 void setup() {
   // no setup required for piezo buzzer
