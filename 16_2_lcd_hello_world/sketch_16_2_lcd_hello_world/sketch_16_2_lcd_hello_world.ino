@@ -27,6 +27,9 @@ void setup() {
 
 void loop() {
   // do go down to the next row, modify the 2nd parameter to 1
+  lcd.clear();
   lcd.setCursor(0, 0);
-  lcd.print("Hello, Syuzi jan"); 
+  lcd.print("Hello, World!");
+
+  delay(500);
 }
