@@ -1,18 +1,5 @@
-#include <Wire.h>
-#include <LiquidCrystal_I2C.h>
-
-/*
-I2C Board of LCD Arduino
-GND <---> GND
-VCC <---> 5V
-SDA <---> A4
-SCL <---> A5
-*/
-
-//initialize lcd
-LiquidCrystal_I2C lcd(0x27, 20, 4);
-
 const int LEDS[] = {13, 12, 11, 10, 9, 8, 7, 6};
+const int POT = A0;
 
 void setup() {
   // engage serial communication
@@ -22,21 +9,8 @@ void setup() {
   for (int i = 0; i < 8; i++) {
     pinMode(LEDS[i], OUTPUT);
   }
-  
-  // setup lcd
-  lcd.init();
-  lcd.clear();         
-  lcd.backlight();      // Make sure backlight is on
-  
-  // Print a message on both lines of the LCD.
-  //lcd.cursor(column,row) index starts at 0
-  lcd.setCursor(2,0);   //Set cursor to character 2 on line 0
-  lcd.print("LED Binary Seq");
-  
-  lcd.setCursor(2,1);   //Move cursor to character 2 on line 1
-  lcd.print("By Armond");
 
-
+  pinMode(POT, INPUT);
 }
 
 void loop() {
@@ -56,6 +30,9 @@ void loop() {
     tally = 0;
     myByteStr = "";
 
+    int potReading = analogRead(POT);
+    int ledBrightness = map(potReading, 0, 1023, 0, 255);
+
     // determine which bits are on/off
     for (int i = 0; i < 8; i++) {
       if ((geometricSequence[i] + tally) <= x) {
@@ -64,17 +41,11 @@ void loop() {
       }
       myByteStr += myByte[i]; // to display to LCD
     }
-    
-    lcd.clear();
-    lcd.setCursor(2, 0);
-    lcd.print("Decimal: " + String(x));
-    lcd.setCursor(2, 1);
-    lcd.print(myByteStr);
 
     // turn LED on based on whether bit is on or off
     for (int i = 0; i < 8; i++) {
       if (myByte[i] == 1) {
-        digitalWrite(LEDS[i], HIGH);
+        analogWrite(LEDS[i], ledBrightness);
       }
     }
 
