@@ -11,6 +11,19 @@ void setup() {
   }
 
   pinMode(POT, INPUT);
+  
+  // setup lcd
+  lcd.init();
+  lcd.clear();         
+  lcd.backlight();      // Make sure backlight is on
+  
+  // Print a message on both lines of the LCD.
+  //lcd.cursor(column,row) index starts at 0
+  lcd.setCursor(2,0);   //Set cursor to character 2 on line 0
+  lcd.print("LED Binary Seq");
+  
+  lcd.setCursor(2,1);   //Move cursor to character 2 on line 1
+  lcd.print("By Armond");
 }
 
 void loop() {
