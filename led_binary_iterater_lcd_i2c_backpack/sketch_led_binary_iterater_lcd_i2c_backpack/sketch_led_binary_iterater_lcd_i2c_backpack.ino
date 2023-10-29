@@ -35,8 +35,6 @@ void setup() {
   
   lcd.setCursor(2,1);   //Move cursor to character 2 on line 1
   lcd.print("By Armond");
-
-
 }
 
 void loop() {
