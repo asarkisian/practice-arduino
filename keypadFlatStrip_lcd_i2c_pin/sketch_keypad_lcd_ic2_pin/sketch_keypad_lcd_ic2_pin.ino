@@ -47,7 +47,7 @@ Keypad keypad = Keypad( makeKeymap(keys), pin_rows, pin_column, KEYPAD_ROW, KEYP
 const String LOGIN = "3002"; // Engage the LED
 const String LOGOUT = "0"; // Disengage the LED
 const int INPUT_MAX_CHARACTERS = 4;
-String userPassword = "";
+String userCode = "";
 
 void setup() {
   // engage serial communication
@@ -63,7 +63,7 @@ void setup() {
   pinMode(POT_LED, INPUT);
 
   // set keypad config
-  userPassword.reserve(INPUT_MAX_CHARACTERS);
+  userCode.reserve(INPUT_MAX_CHARACTERS);
 
   lcd.clear();
   lcd.setCursor(0, 0);
@@ -87,34 +87,34 @@ void loop() {
   const int ledBrightness = map(potReading, 0, 1023, 0, 255);
 
   // user status
-  static String hiddenPassword = "";
+  static String hiddenCode = "";
   static bool isLoggedIn = false;
   static int failedAttempts = 0;
   const int MAX_ATTEMPTS = 5;
-  int passwordLength = 0;
+  int codeLength = 0;
 
   // get keypad input
   char key = keypad.getKey();
 
   // check the key
   if (key){
-    passwordLength += 1;
+    codeLength += 1;
     Serial.println(key);
     lcd.setCursor(12, 0);
-    for (int i = 0; i < passwordLength; i++) {
-      hiddenPassword += "*";
+    for (int i = 0; i < codeLength; i++) {
+      hiddenCode += "*";
     }
-    lcd.print(hiddenPassword);
+    lcd.print(hiddenCode);
 
     if (key == '*') {
-      userPassword = "";
-      hiddenPassword = "";
-      passwordLength = 0;
+      userCode = "";
+      hiddenCode = "";
+      codeLength = 0;
       const String screen[4] = {"Enter code: ", "", "", ""};
       displayScreen(screen);
     }
     else if (key == '#') {
-      if (userPassword == LOGIN) {
+      if (userCode == LOGIN) {
         
         // reset attempts
         failedAttempts = 0;
@@ -123,54 +123,62 @@ void loop() {
           analogWrite(LED_GREEN, ledBrightness);
           const String screen[4] = {"Enter code: ", "", "Already logged in!", ""};
           displayScreen(screen);
-          userPassword = "";
-          hiddenPassword = "";
-          passwordLength = 0;
+          userCode = "";
+          hiddenCode = "";
+          codeLength = 0;
         } else {
           isLoggedIn = true;
           analogWrite(LED_GREEN, ledBrightness);
           const String screen[4] = {"Enter code: ", "", "You are logged in!", ""};
           displayScreen(screen);
-          userPassword = "";
-          hiddenPassword = "";
-          passwordLength = 0;
+          userCode = "";
+          hiddenCode = "";
+          codeLength = 0;
         }
-      } else if(userPassword == LOGOUT){
+      } else if(userCode == LOGOUT){
         if (isLoggedIn) {
           isLoggedIn = false;
           analogWrite(LED_GREEN, 0);
           const String screen[4] = {"Enter code: ", "", "You are logged out!", ""};
           displayScreen(screen);
-          userPassword = "";
-          hiddenPassword = "";
-          passwordLength = 0;
+          userCode = "";
+          hiddenCode = "";
+          codeLength = 0;
         } else {
           const String screen[4] = {"Enter code: ", "", "Already logged out!", ""};
           displayScreen(screen);
-          userPassword = "";
-          hiddenPassword = "";
-          passwordLength = 0;
+          userCode = "";
+          hiddenCode = "";
+          codeLength = 0;
         }
       } else {
-        String attemptsStr = "Tries: " + String(failedAttempts+1) + "/5";
-        const String screen[4] = {"Enter code: ", "", "Invalid code!", attemptsStr};
-        displayScreen(screen);
-        userPassword = "";
-        hiddenPassword = "";
-        passwordLength = 0;
-        failedAttempts += 1;
-
-        if (failedAttempts >= MAX_ATTEMPTS) {
-          const String screen[4] = {"Access denied: ", "", "Locked - 30 minutes!", ""};
+        if (!isLoggedIn) {
+          String attemptsStr = "Tries: " + String(failedAttempts+1) + "/5";
+          const String screen[4] = {"Enter code: ", "", "Invalid code!", attemptsStr};
           displayScreen(screen);
-          userPassword = "";
-          delay(60*60*30);
-          failedAttempts = 0;     
+          userCode = "";
+          hiddenCode = "";
+          codeLength = 0;
+          failedAttempts += 1;
+
+          if (failedAttempts >= MAX_ATTEMPTS) {
+            const String screen[4] = {"Access denied: ", "", "Locked - 30 minutes!", ""};
+            displayScreen(screen);
+            userCode = "";
+            delay(60*60*30);
+            failedAttempts = 0;     
+          }
+        } else {
+          userCode = "";
+          hiddenCode = "";
+          codeLength = 0;
+          const String screen[4] = {"Enter code: ", "", "", ""};
+          displayScreen(screen);
         }
       }
     } else {
-      userPassword += key;
-      Serial.println(userPassword);
+      userCode += key;
+      Serial.println(userCode);
     }
   }
 
