@@ -8,7 +8,7 @@
 const short PIEZO_PIN = 5;
 
 void setup() {
-  // no setup required for piezo buzzer
+  pinMode(PIEZO_PIN, OUTPUT);
 }
 
 void loop() {
