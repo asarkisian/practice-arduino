@@ -1,9 +1,8 @@
-
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <LinkedList.h>
 #include <SPI.h>
 #include <Streaming.h>
-#include <Vector.h>
 #include <Wire.h>
 
 #define SERIAL_BAUD_RATE 9600
@@ -31,9 +30,9 @@ int ledPins[5] = {2, 3, 4, 5, 6};
 const int PIEZO_BUZZER_PIN = 7;
 
 // sequence
-const int SEQUENCE_COUNT_MAX = 30;
-typedef Vector<int> Sequence;
-Sequence seq;
+const int SEQUENCE_COUNT_MAX = 10;
+LinkedList<int> mySeq = LinkedList<int>();
+LinkedList<int> seq = LinkedList<int>();
 
 // level
 int level = 1;
@@ -60,15 +59,13 @@ void setup() {
   display.clearDisplay();
 
   // set input pins (buttons)
-  Vector<uint8_t> buttonPinsVec(buttonPins);
-  for (uint8_t button : buttonPinsVec) {
-    pinMode(button, INPUT);
+  for (int i = 0; i < 5; i++) {
+    pinMode(buttonPins[i], INPUT);
   }
 
   // set output pins (leds)
-  Vector<int> ledPinsVec(ledPins);
-  for (int led : ledPinsVec) {
-    pinMode(led, OUTPUT);
+  for (int i = 0; i < 5; i++) {
+    pinMode(ledPins[i], OUTPUT);
   }
 
   // set output pins (buzzer)
@@ -77,46 +74,34 @@ void setup() {
 
 void drawText(int size, int color, int x, int y, String text) {
   display.clearDisplay();
-
-  display.setTextSize(size);              // Normal 1:1 pixel scale
-  display.setTextColor(color); // Draw white text
-  display.setCursor(x, y);              // Start at top-left corner
+  display.setTextSize(size);
+  display.setTextColor(color);
+  display.setCursor(x, y);
   display.println(text);
-
   display.display();
 }
 
 void generateSequence() {
-  int storageArray[SEQUENCE_COUNT_MAX];
-  seq.setStorage(storageArray);
-
+  Serial << "Preparing to push back. We are at level: " << level << endl;
   for (int i = 0; i < level; i++) {
     const int RAN_NUM = random(2, 7);
-    seq.push_back(RAN_NUM);
+    seq.add(RAN_NUM);
     Serial << "Pushing back sequence: " << String(RAN_NUM) << endl;
   }
 }
 
 void activateSequence() {
-  for (int d : seq) {
-    Serial << "Activate sequence | Pin: " << String(d) << " -- setting HIGH!" << endl;
-    digitalWrite(d, HIGH);
-    delay(750);
-    Serial << "Activate sequence | Pin: " << String(d) << " -- setting LOW!" << endl;
-    digitalWrite(d, LOW);
+  for (int i = 0; i < seq.size(); i++) {
+    Serial << "Activate sequence | Pin: " << seq.get(i) << " -- setting HIGH!" << endl;
+    digitalWrite(seq.get(i), HIGH);
+    delay(1000);
+    Serial << "Activate sequence | Pin: " << seq.get(i) << " -- setting LOW!" << endl;
+    digitalWrite(seq.get(i), LOW);
   }
-
-  return seq;
 }
 
-void getInputAndCheck() {
-  bool isInputReceived = false;
-  int keysInputted = 0;
-
-  Serial << "Entering the while loop! | isInputReceived: " << isInputReceived << endl;
-  
-  while (!isInputReceived) {
-    Serial << "Getting button status via digitalRead" << endl;
+bool getInputAndCheck() {
+  while (mySeq.size() < seq.size()) {
     int buttonRed = digitalRead(buttonPins[0]);
     int buttonGreen = digitalRead(buttonPins[1]);
     int buttonBlue = digitalRead(buttonPins[2]);
@@ -125,50 +110,65 @@ void getInputAndCheck() {
 
     if (buttonRed == HIGH) {
       Serial << "Red was pressed!" << endl;
-      keysInputted++;
+      mySeq.add(6);
+      delay(100);
     }
     
     if (buttonGreen == HIGH) {
       Serial << "Green was pressed!" << endl;
-      keysInputted++;
+      mySeq.add(5);
+      delay(100);
     }
     
     if (buttonBlue == HIGH) {
       Serial << "Blue was pressed!" << endl;
-      keysInputted++;
+      mySeq.add(4);
+      delay(100);
     }
     
     if (buttonWhite == HIGH) {
       Serial << "White was pressed!" << endl;
-      keysInputted++;
+      mySeq.add(3);
+      delay(100);
     }
     
     if (buttonYellow == HIGH) {
       Serial << "Yellow was pressed!" << endl;
-      keysInputted++;
+      mySeq.add(2);
+      delay(100);
     }
-    
-    if (keysInputted >= level) {
-      isInputReceived = true;
-      Serial << "Breaking out of the loop | keysInputted: " << String(keysInputted) << " | Level: " << String(level) << endl;
-    }
+  }
 
-    delay(100);
+  delay(50);
+
+  if (mySeq.size() != seq.size()) {
+    Serial << "Error: Something broke.. users sequence size does not match program sequence size!" << endl;
+    return false;
   }
 
   // check the answer
+  bool isCorrect = true;
+
+  for (int i = 0; i < seq.size(); i++) {
+    Serial << "Comparing two values for i = " << i << " | mySeq.at(i) = " << mySeq.get(i) << " | seq.at(i) = " << seq.get(i) << endl;
+    if (mySeq.get(i) != seq.get(i)) {
+      Serial << "INCORRECT VALUE FOUND!!!!!!!!!!!!!!!!" << endl;
+      isCorrect = false;
+    }
+  }
+
+  Serial << "Returning isCorrect: " << isCorrect << endl;
+  return isCorrect;
 }
 
-void clearSequence() {
-  for (int i = 0; i < seq.size(); i++) {
-    seq.remove(i);
-    Serial << "Clearing sequence: " << i << endl;
-  }
+void clearSequences() {
+  seq.clear();
+  mySeq.clear();
 }
 
 void loop() {
   Serial << "Preparing to clear sequence" << endl;
-  clearSequence();
+  clearSequences();
 
   // display the level number
   drawText(1, SSD1306_WHITE, 0, 0, "Level: " + String(level));
@@ -180,7 +180,14 @@ void loop() {
 
   // get input
   Serial << "Preparing to get input" << endl;
-  getInputAndCheck();
+  
+  if (getInputAndCheck()) {
+    level++;
+    Serial << "Incrementing level: " << level << endl;
+  } else {
+    level = 1;
+    Serial << "Game over!!!, we are back to level 1 " << endl;
+  }
 
   delay(1000);
 
