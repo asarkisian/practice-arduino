@@ -33,6 +33,10 @@ const int PIEZO_BUZZER_PIN = 7;
 // sequence
 const int SEQUENCE_COUNT_MAX = 30;
 typedef Vector<int> Sequence;
+Sequence seq;
+
+// level
+int level = 1;
 
 void setup() {
   // engage serial communication
@@ -45,7 +49,7 @@ void setup() {
     for(;;); // Don't proceed, loop forever
   }
 
-  drawText("Armond Says V1.0");
+  drawText(1, SSD1306_WHITE, 0, 0, "Armond Says V1.0");
 
   // Show initial display buffer contents on the screen --
   // the library initializes this with an Adafruit splash screen.
@@ -63,75 +67,122 @@ void setup() {
 
   // set output pins (leds)
   Vector<int> ledPinsVec(ledPins);
-  for (int button : ledPinsVec) {
-    pinMode(button, INPUT);
+  for (int led : ledPinsVec) {
+    pinMode(led, OUTPUT);
   }
 
   // set output pins (buzzer)
   //pinMode(PIEZO_BUZZER_PIN, OUTPUT);
 }
 
-void drawText(String text) {
+void drawText(int size, int color, int x, int y, String text) {
   display.clearDisplay();
 
-  display.setTextSize(1);              // Normal 1:1 pixel scale
-  display.setTextColor(SSD1306_WHITE); // Draw white text
-  display.setCursor(0,0);              // Start at top-left corner
+  display.setTextSize(size);              // Normal 1:1 pixel scale
+  display.setTextColor(color); // Draw white text
+  display.setCursor(x, y);              // Start at top-left corner
   display.println(text);
 
   display.display();
 }
 
-Sequence generateSequence(int level) {
-  Sequence buffer;
+void generateSequence() {
   int storageArray[SEQUENCE_COUNT_MAX];
-  buffer.setStorage(storageArray);
+  seq.setStorage(storageArray);
 
   for (int i = 0; i < level; i++) {
     const int RAN_NUM = random(2, 7);
-    buffer.push_back(RAN_NUM);
+    seq.push_back(RAN_NUM);
+    Serial << "Pushing back sequence: " << String(RAN_NUM) << endl;
   }
-
-  Serial << "Buffer ( in the function ): " << buffer << endl;
-
-  return buffer;
 }
 
-Sequence activateSequence(Sequence seq) {
-  Serial << "Sequence ( in the function ): " << seq << endl;
+void activateSequence() {
   for (int d : seq) {
+    Serial << "Activate sequence | Pin: " << String(d) << " -- setting HIGH!" << endl;
     digitalWrite(d, HIGH);
     delay(750);
+    Serial << "Activate sequence | Pin: " << String(d) << " -- setting LOW!" << endl;
     digitalWrite(d, LOW);
   }
-
-  Serial << "Sequence ( inside the FUNCTION ): " << seq << endl;
 
   return seq;
 }
 
+void getInputAndCheck() {
+  bool isInputReceived = false;
+  int keysInputted = 0;
+
+  Serial << "Entering the while loop! | isInputReceived: " << isInputReceived << endl;
+  
+  while (!isInputReceived) {
+    Serial << "Getting button status via digitalRead" << endl;
+    int buttonRed = digitalRead(buttonPins[0]);
+    int buttonGreen = digitalRead(buttonPins[1]);
+    int buttonBlue = digitalRead(buttonPins[2]);
+    int buttonWhite = digitalRead(buttonPins[3]);
+    int buttonYellow = digitalRead(buttonPins[4]);
+
+    if (buttonRed == HIGH) {
+      Serial << "Red was pressed!" << endl;
+      keysInputted++;
+    }
+    
+    if (buttonGreen == HIGH) {
+      Serial << "Green was pressed!" << endl;
+      keysInputted++;
+    }
+    
+    if (buttonBlue == HIGH) {
+      Serial << "Blue was pressed!" << endl;
+      keysInputted++;
+    }
+    
+    if (buttonWhite == HIGH) {
+      Serial << "White was pressed!" << endl;
+      keysInputted++;
+    }
+    
+    if (buttonYellow == HIGH) {
+      Serial << "Yellow was pressed!" << endl;
+      keysInputted++;
+    }
+    
+    if (keysInputted >= level) {
+      isInputReceived = true;
+      Serial << "Breaking out of the loop | keysInputted: " << String(keysInputted) << " | Level: " << String(level) << endl;
+    }
+
+    delay(100);
+  }
+
+  // check the answer
+}
+
+void clearSequence() {
+  for (int i = 0; i < seq.size(); i++) {
+    seq.remove(i);
+    Serial << "Clearing sequence: " << i << endl;
+  }
+}
+
 void loop() {
-  static int level = 1;
+  Serial << "Preparing to clear sequence" << endl;
+  clearSequence();
 
   // display the level number
-  drawText("Level: " + String(level));
+  drawText(1, SSD1306_WHITE, 0, 0, "Level: " + String(level));
+  Serial << "Preparing to generate sequence" << endl;
+  generateSequence();
 
-  // display the light sequence + play sounds
-  Sequence seq = activateSequence(generateSequence(level));
-
-  Serial << "Sequence: (outside the FUNCTION) " << seq << endl;
+  Serial << "Preparing to activate sequence" << endl;
+  activateSequence();
 
   // get input
-  //int buttonRed = digitalRead(BUTTON_RED_PIN);
-  //int buttonGreen = digitalRead(BUTTON_GREEN_PIN);
-  //int buttonBlue = digitalRead(BUTTON_BLUE_PIN);
-  //int buttonWhite = digitalRead(BUTTON_WHITE_PIN);
-  //int buttonYellow = digitalRead(BUTTON_YELLOW_PIN);
-
-  // determine if correct
-
-  // if correct --> go to next level
-  // if not correct, display "Game Over" and restart back to level 1
+  Serial << "Preparing to get input" << endl;
+  getInputAndCheck();
 
   delay(1000);
+
+  Serial << "End of the main loop" << endl;
 }
