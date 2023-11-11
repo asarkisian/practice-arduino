@@ -30,11 +30,11 @@ int ledPins[5] = {2, 3, 4, 5, 6};
 const int PIEZO_BUZZER_PIN = 7;
 
 // sequence
-const int SEQUENCE_COUNT_MAX = 10;
 LinkedList<int> mySeq = LinkedList<int>();
 LinkedList<int> seq = LinkedList<int>();
 
 // level
+const int MAX_LEVEL = 3;
 int level = 1;
 
 void setup() {
@@ -82,21 +82,18 @@ void drawText(int size, int color, int x, int y, String text) {
 }
 
 void generateSequence() {
-  Serial << "Preparing to push back. We are at level: " << level << endl;
   for (int i = 0; i < level; i++) {
     const int RAN_NUM = random(2, 7);
     seq.add(RAN_NUM);
-    Serial << "Pushing back sequence: " << String(RAN_NUM) << endl;
   }
 }
 
 void activateSequence() {
   for (int i = 0; i < seq.size(); i++) {
-    Serial << "Activate sequence | Pin: " << seq.get(i) << " -- setting HIGH!" << endl;
     digitalWrite(seq.get(i), HIGH);
-    delay(1000);
-    Serial << "Activate sequence | Pin: " << seq.get(i) << " -- setting LOW!" << endl;
+    delay(500);
     digitalWrite(seq.get(i), LOW);
+    delay(500);
   }
 }
 
@@ -115,25 +112,21 @@ bool getInputAndCheck() {
     }
     
     if (buttonGreen == HIGH) {
-      Serial << "Green was pressed!" << endl;
       mySeq.add(5);
       delay(100);
     }
     
     if (buttonBlue == HIGH) {
-      Serial << "Blue was pressed!" << endl;
       mySeq.add(4);
       delay(100);
     }
     
     if (buttonWhite == HIGH) {
-      Serial << "White was pressed!" << endl;
       mySeq.add(3);
       delay(100);
     }
     
     if (buttonYellow == HIGH) {
-      Serial << "Yellow was pressed!" << endl;
       mySeq.add(2);
       delay(100);
     }
@@ -142,17 +135,14 @@ bool getInputAndCheck() {
   delay(50);
 
   if (mySeq.size() != seq.size()) {
-    Serial << "Error: Something broke.. users sequence size does not match program sequence size!" << endl;
-    return false;
+    Serial << "Error: mySeq.size() (" << mySeq.size() << ") should equal seq.size() (" << seq.size() << ")" << endl;
+    exit(0);
   }
 
-  // check the answer
   bool isCorrect = true;
 
   for (int i = 0; i < seq.size(); i++) {
-    Serial << "Comparing two values for i = " << i << " | mySeq.at(i) = " << mySeq.get(i) << " | seq.at(i) = " << seq.get(i) << endl;
     if (mySeq.get(i) != seq.get(i)) {
-      Serial << "INCORRECT VALUE FOUND!!!!!!!!!!!!!!!!" << endl;
       isCorrect = false;
     }
   }
@@ -167,29 +157,23 @@ void clearSequences() {
 }
 
 void loop() {
-  Serial << "Preparing to clear sequence" << endl;
   clearSequences();
-
-  // display the level number
   drawText(1, SSD1306_WHITE, 0, 0, "Level: " + String(level));
-  Serial << "Preparing to generate sequence" << endl;
   generateSequence();
-
-  Serial << "Preparing to activate sequence" << endl;
   activateSequence();
-
-  // get input
-  Serial << "Preparing to get input" << endl;
-  
   if (getInputAndCheck()) {
     level++;
-    Serial << "Incrementing level: " << level << endl;
+    if (level > MAX_LEVEL) {
+      drawText(1, SSD1306_WHITE, 0, 0, "You won. Congratulations!");
+      // TODO: play winning music
+      delay(1000);
+      level = 1; 
+    }
   } else {
-    level = 1;
-    Serial << "Game over!!!, we are back to level 1 " << endl;
+    level = 1; 
+    drawText(1, SSD1306_WHITE, 0, 0, "Game over!");
+    delay(1000);
   }
 
   delay(1000);
-
-  Serial << "End of the main loop" << endl;
 }
