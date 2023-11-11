@@ -5,6 +5,37 @@
 #include <Streaming.h>
 #include <Wire.h>
 
+/*
+Circuit instructions:
+
+Arduino 5V => Breadboard 5V
+Arduino GND => Breadboard GND
+
+OLED SSD136 128x32:
+ - GND => Arduino GND
+ - VCC => Arduino 5V
+ - SDA => Arduino A4 (UNO) or Arduino D20 (MEGA)
+ - SCL => Arduino A5 (UNO) or Arduino D21 (MEGA)
+
+Piezo Buzzer:
+ - GND => Arduino GND
+ - 5V => Arduino D8
+
+LED's:
+ - Red LED => 330 OHM RES => Arduino D6
+ - Green LED => 330 OHM RES => Arduino D5
+ - Blue LED => 330 OHM RES => Arduino D4
+ - White LED => 330 OHM RES => Arduino D3
+ - Yellow LED => 330 OHM RES => Arduino D2
+
+ BUTTONS:
+  - Red Button => 10K OHM RES => Arduino A0
+  - Green Button => 10K OHM RES => Arduino A1
+  - Blue Button => 10K OHM RES => Arduino A2
+  - White Button => 10K OHM RES => Arduino A3
+  - Yellow Button => 10K OHM RES => Arduino A4
+*/
+
 #define SERIAL_BAUD_RATE 9600
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 32 // OLED display height, in pixels
@@ -27,15 +58,26 @@ uint8_t buttonPins[5] = {A0, A1, A2, A3, A4};
 int ledPins[5] = {2, 3, 4, 5, 6};
 
 // buzzer pin
-const int PIEZO_BUZZER_PIN = 7;
+const int PIEZO_BUZZER_PIN = 8;
 
 // sequence
 LinkedList<int> mySeq = LinkedList<int>();
 LinkedList<int> seq = LinkedList<int>();
 
 // level
-const int MAX_LEVEL = 3;
+const int MAX_LEVEL = 10;
 int level = 1;
+
+// speed
+const int GAME_SPEED = 500; // in ms
+
+// sounds
+const int SOUND_DELAY_FREQUENCY = 500;
+const int RED_SOUND = 100;
+const int GREEN_SOUND = 750;
+const int BLUE_SOUND = 1500;
+const int WHITE_SOUND = 3000;
+const int YELLOW_SOUND = 5000;
 
 void setup() {
   // engage serial communication
@@ -69,7 +111,7 @@ void setup() {
   }
 
   // set output pins (buzzer)
-  //pinMode(PIEZO_BUZZER_PIN, OUTPUT);
+  pinMode(PIEZO_BUZZER_PIN, OUTPUT);
 }
 
 void drawText(int size, int color, int x, int y, String text) {
@@ -90,10 +132,27 @@ void generateSequence() {
 
 void activateSequence() {
   for (int i = 0; i < seq.size(); i++) {
+    if (seq.get(i) == ledPins[0]) {
+      //[0] = 2 = yellow
+      tone(PIEZO_BUZZER_PIN, YELLOW_SOUND, SOUND_DELAY_FREQUENCY);
+    } else if (seq.get(i) == ledPins[1]) {
+      //[1] = 3 = white
+      tone(PIEZO_BUZZER_PIN, WHITE_SOUND, SOUND_DELAY_FREQUENCY);
+    } else if (seq.get(i) == ledPins[2]) {
+      //[2] = 4 = blue
+      tone(PIEZO_BUZZER_PIN, BLUE_SOUND, SOUND_DELAY_FREQUENCY);
+    } else if (seq.get(i) == ledPins[3]) {
+      //[3] = 5 = green
+      tone(PIEZO_BUZZER_PIN, GREEN_SOUND, SOUND_DELAY_FREQUENCY);
+    } else if (seq.get(i) == ledPins[4]) {
+      //[4] = 6 = red
+      tone(PIEZO_BUZZER_PIN, RED_SOUND, SOUND_DELAY_FREQUENCY);
+    }
+    
     digitalWrite(seq.get(i), HIGH);
-    delay(500);
+    delay(GAME_SPEED);
     digitalWrite(seq.get(i), LOW);
-    delay(500);
+    delay(GAME_SPEED);
   }
 }
 
@@ -106,37 +165,51 @@ bool getInputAndCheck() {
     int buttonYellow = digitalRead(buttonPins[4]);
 
     if (buttonRed == HIGH) {
-      Serial << "Red was pressed!" << endl;
       mySeq.add(6);
-      delay(100);
+      tone(PIEZO_BUZZER_PIN, RED_SOUND, SOUND_DELAY_FREQUENCY);
+      digitalWrite(ledPins[4], HIGH);
+      delay(250);
+      digitalWrite(ledPins[4], LOW);
     }
     
     if (buttonGreen == HIGH) {
       mySeq.add(5);
-      delay(100);
+      tone(PIEZO_BUZZER_PIN, GREEN_SOUND, SOUND_DELAY_FREQUENCY);
+      digitalWrite(ledPins[3], HIGH);
+      delay(250);
+      digitalWrite(ledPins[3], LOW);
     }
     
     if (buttonBlue == HIGH) {
       mySeq.add(4);
-      delay(100);
+      tone(PIEZO_BUZZER_PIN, BLUE_SOUND, SOUND_DELAY_FREQUENCY);
+      digitalWrite(ledPins[2], HIGH);
+      delay(250);
+      digitalWrite(ledPins[2], LOW);
     }
     
     if (buttonWhite == HIGH) {
       mySeq.add(3);
-      delay(100);
+      tone(PIEZO_BUZZER_PIN, WHITE_SOUND, SOUND_DELAY_FREQUENCY);
+      digitalWrite(ledPins[1], HIGH);
+      delay(250);
+      digitalWrite(ledPins[1], LOW);
     }
     
     if (buttonYellow == HIGH) {
       mySeq.add(2);
-      delay(100);
+      tone(PIEZO_BUZZER_PIN, YELLOW_SOUND, SOUND_DELAY_FREQUENCY);
+      digitalWrite(ledPins[0], HIGH);
+      delay(250);
+      digitalWrite(ledPins[0], LOW);
     }
   }
 
-  delay(50);
+  delay(100);
 
   if (mySeq.size() != seq.size()) {
     Serial << "Error: mySeq.size() (" << mySeq.size() << ") should equal seq.size() (" << seq.size() << ")" << endl;
-    exit(0);
+    exit(0); // abort the program, user must press reset to start over
   }
 
   bool isCorrect = true;
@@ -147,7 +220,6 @@ bool getInputAndCheck() {
     }
   }
 
-  Serial << "Returning isCorrect: " << isCorrect << endl;
   return isCorrect;
 }
 
