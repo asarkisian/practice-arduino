@@ -90,7 +90,7 @@ void setup() {
     for(;;); // Don't proceed, loop forever
   }
 
-  drawText(1, SSD1306_WHITE, 0, 0, "Armond Says V1.0");
+  drawText(1, SSD1306_WHITE, 0, 0, "Simon Says V1.0");
 
   // Show initial display buffer contents on the screen --
   // the library initializes this with an Adafruit splash screen.
