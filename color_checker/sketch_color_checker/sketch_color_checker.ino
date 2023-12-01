@@ -17,8 +17,7 @@ void setup()
    Serial.begin(9600);   
    
    digitalWrite(s0,HIGH); //Putting S0/S1 on HIGH/HIGH levels means the output frequency scalling is at 100% (recommended)
-   digitalWrite(s1,HIGH); 
-   
+   digitalWrite(s1,HIGH);
 }
 
 void loop()                  //Every 0.2s we select a photodiodes set and read its data
