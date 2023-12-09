@@ -65,7 +65,7 @@ LinkedList<int> mySeq = LinkedList<int>();
 LinkedList<int> seq = LinkedList<int>();
 
 // level
-const int MAX_LEVEL = 25;
+const int MAX_LEVEL = 10;
 int level = 1;
 
 // speed
