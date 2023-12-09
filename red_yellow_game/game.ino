@@ -1,3 +1,25 @@
+/*
+  2 Circuit instructions (if not using I2C Backpack):
+  3
+  4 01. Arduino 5V to Breadboard Positive Bus
+  5 02. Arduino GND to Breadboard Negative Bus
+  6 03. Arduino Digital 12 to LCD RS (pin # 4)
+  7 04. Arduino GND to LCD RW (pin # 5)
+  8 05. Arduino Digital 11 to LCD E (pin # 6)
+  9 06. Arduino Digital 5 to LCD D4 (pin # 11)
+ 10 07. Arduino Digital 4 to LCD D5 (pin # 12)
+ 11 08. Arduino Digital 3 to LCD D6 (pin # 13)
+ 12 09. Arduino Digital 2 to LCD D7 (pin # 14)
+ 13 10. LCD VSS (pin # 1) to Breadboard Negative Bus
+ 14 11. LCD VDD (pin # 2) to Breadboard Positive Bus
+ 15 12. LCD VO (pin # 3) to either resistor (220 ohm) Breadboard Positive Bus "OR" 10k Potentiometer Middle/Output pin
+ 16  (this dims/brightens the text)
+ 17 13. LCD A (pin # 15) to either resistor (220 ohm) Breadboard Positive Bus "OR" 10k Potentiometer Middle/Output pin
+ 18  (this dims/brightens the background)
+ 19 14. LCD K (pin # 16) to Breadboard Negative Bus
+ 20 15. If Potentiometer(s) were used, be sure to connect the VCC to 5V and the GND to Arduino GND
+ 21 */
+
 #include <LiquidCrystal.h>
 #include <Keypad.h>
 
