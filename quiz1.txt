@@ -1,0 +1,73 @@
+What is Arduino?
+a) A programming language
+b) An electronics company
+c) An open-source electronics platform
+d) A type of microcontroller
+
+Which programming language is commonly used with Arduino?
+a) Python
+b) C++
+c) Java
+d) JavaScript
+
+What is the main purpose of the setup() function in Arduino programming?
+a) To declare variables
+b) To define the main loop
+c) To initialize settings
+d) To print output to the serial monitor
+
+Which pin is commonly used for analog input in Arduino?
+a) Pin 0
+b) Pin 5
+c) Pin A0
+d) Pin D7
+
+Which function is used to read an analog sensor value in Arduino?
+a) analogWrite()
+b) digitalRead()
+c) analogRead()
+d) digitalWrite()
+
+How do you comment a single line in Arduino code?
+a) // This is a comment
+b) /* This is a comment */
+c) ** This is a comment **
+d) -- This is a comment --
+
+Which Arduino board is commonly used for beginners?
+a) Arduino Uno
+b) Arduino Mega
+c) Arduino Nano
+d) Arduino Due
+What is the purpose of the loop() function in Arduino?
+a) To handle errors
+b) To repeat a set of instructions
+c) To declare variables
+d) To define pin configurations
+
+
+         What is the purpose of the pinMode() function in Arduino?
+a) To set the analog reference voltage
+b) To configure a pin as input or output
+c) To define the baud rate for serial communication
+d) To adjust the brightness of an LED
+
+           Which Arduino function is used to clear the contents of the serial monitor?
+a) Serial.clear()
+b) Serial.flush()
+c) Serial.reset()
+d) Serial.erase()
+
+What is the primary purpose of the Serial.begin() function in Arduino?
+a) To begin the main loop of the program
+b) To initialize serial communication
+c) To declare a serial monitor
+d) To set the baud rate for analog communication
+
+What is a passive buzzer for?
+What is an Ultrasonic Sensor for?
+What is a Motion Sensor Module for?
+Where can you use a Stepper motor and with which module you need to use ?
+What is a Potentiometer?
+Why do we need to use  a resistor ?
+What is Servo Motor for?
